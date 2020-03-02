@@ -7,7 +7,7 @@
   ["C" "C#" "D" "D#" "E" "F" "F#" "G" "G#" "A" "A#" "B"])
 
 
-(defn upscale [{:app.lookup/keys [note octave]}]
+(defn upscale [{::keys [note octave]}]
   (loop [note   note
          octave octave
          scale  tuning-scale]
@@ -103,7 +103,7 @@
 
 (defn- find-by-note [note]
   (filter
-    (fn [[k v]] (= (::note v) note))))
+    (fn [[_ v]] (= (::note v) note))))
 
 
 (defn lookup-note
@@ -113,7 +113,5 @@
               [string (into {} (find-by-note note) fret+notes)])
             string->fret->note)))
 
-(lookup-note "A")
-
-
-
+(comment
+  (lookup-note "A"))
