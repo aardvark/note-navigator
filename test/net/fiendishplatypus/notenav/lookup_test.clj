@@ -5,14 +5,13 @@
 
 (deftest note-test
   (testing "note should return correct note and octave"
-    (is (= {::lookup/note "E" ::lookup/octave 1} (lookup/note 6 0)))
-    (is (= {::lookup/note "E" ::lookup/octave 2} (lookup/note 6 12)))
-    (is (= {::lookup/note "E" ::lookup/octave 2} (lookup/note 5 7)))
-    (is (= {::lookup/note "E" ::lookup/octave 2} (lookup/note 4 2))))
-
+    (is (= (lookup/note 6 0) {::lookup/note "E" ::lookup/octave 1}))
+    (is (= (lookup/note 6 12) {::lookup/note "E" ::lookup/octave 2}))
+    (is (= (lookup/note 5 7) {::lookup/note "E" ::lookup/octave 2}))
+    (is (= (lookup/note 4 2) {::lookup/note "E" ::lookup/octave 2})))
 
   (testing "lookup-position should return correct position given note and octave"
-    (is (= {::lookup/string 6 ::lookup/fret 0} (lookup/lookup-position "E" 1)))))
+    (is (= (lookup/lookup-position "E" 1) {::lookup/string 6 ::lookup/fret 0}))))
 
 
 (deftest pad-note-test
