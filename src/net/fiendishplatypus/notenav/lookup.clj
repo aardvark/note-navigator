@@ -1,4 +1,5 @@
-(ns net.fiendishplatypus.notenav.lookup)
+(ns net.fiendishplatypus.notenav.lookup
+  (:require [clojure.string]))
 
 
 (def tuning-scale
