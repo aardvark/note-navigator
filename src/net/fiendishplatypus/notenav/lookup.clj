@@ -116,3 +116,9 @@
 
 (comment
   (lookup-note "A"))
+
+;;;; Test run
+(comment
+  (require '[clojure.test :as test])
+  (test/run-tests (symbol (str (.getName *ns*) "-test"))))
+
