@@ -1,3 +1,5 @@
+![Clojure CI](https://github.com/aardvark/note-navigator/workflows/Clojure%20CI/badge.svg?branch=master)
+
 # Notenav
 
 A Clojure library designed to work with notes on guitar. 
