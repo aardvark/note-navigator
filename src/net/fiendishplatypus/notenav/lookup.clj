@@ -47,7 +47,7 @@
 
 
 (defn pprint-note
-  [{:app.lookup/keys [note octave]}]
+  [{::keys [note octave]}]
   (str note octave))
 
 (comment (pprint-note (note 2 5)))
@@ -84,7 +84,7 @@
 
 
 (comment
-  "Print notes on fret up to 12"
+  "Print notes on fret up to 12 in tabulature like view"
   (clojure.string/join "\n"
                        [(str "  " (clojure.string/join (map (partial pad-with-sym " ") fret-numbers)) "|")
                         (clojure.string/join
