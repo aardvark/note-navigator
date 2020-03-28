@@ -1,6 +1,7 @@
 (ns net.fiendishplatypus.notenav.svg
   (:require [analemma.svg :as svg]
-            [analemma.xml :as xml]))
+            [analemma.xml :as xml]
+            [clojure.string]))
 
 (defn- vline [x y1 y2]
   (svg/line x y1 x y2 :stroke "black"))
@@ -84,13 +85,13 @@
 
 ;; [0 30 60 90]
 (defn ladder [start step base]
- (loop [start start
-        step step
-        length (count base)
-        res []]
-   (if (< (count res) length)
-     (recur (+ start step) step length (cons start res))
-     (into [] (reverse res)))))
+  (loop [start  start
+         step   step
+         length (count base)
+         res    []]
+    (if (< (count res) length)
+      (recur (+ start step) step length (cons start res))
+      (into [] (reverse res)))))
 
 
 (defn make-frets [x y frets]
@@ -116,8 +117,12 @@
                    (make-strings 60 95))))))
 
 
-(defn finger-circle [x dx y dy text & root?]
-  (let [style (if root?
+;;circle dx is 20
+;;       dy is 30
+(defn finger-circle [x dx y dy text]
+  (let [root? (clojure.string/includes? text "R")
+        text (clojure.string/replace text "R" "")
+        style (if root?
                 {:circle-fill "red"
                  :text-fill   "white"
                  :text-stroke "white"}
@@ -127,15 +132,27 @@
     [(svg/circle (+ x 40 dx) (+ y 25 dy) 9 :fill (style :circle-fill) :stroke "black" :stroke-width "1")
      (xml/add-attrs (svg/text text) :x (+ x 36 dx) :y (+ y 30 dy) :stroke (style :text-stroke) :fill (style :text-fill))]))
 
+
 (comment
   (spit "test-circles.svg"
         (xml/emit
           (apply svg/svg
                  (concat []
                          [{:width 200 :height 200}]
-                         (finger-circle 0 0 0 0 "1" true)
+                         (finger-circle 0 0 0 0 "1R")
                          (finger-circle 10 20 10 30 "5"))))))
+
+
+(defn circle-row [x0 y0 row]
+  (reduce concat []
+    (let [joined-row (into [] (map (fn [a b] [a b]) (ladder 0 20 row) row))]
+      (for [[dx finger-number] joined-row
+            :when ((complement empty?) finger-number)]
+        (finger-circle x0 dx y0 0 finger-number)))))
+
+
 (comment
+  "Minor pentatonic scale variant 1"
   (spit "test-fret-string-circles.svg"
         (let [x0 10 y0 10]
           (xml/emit
@@ -144,4 +161,8 @@
                      [{:width 200 :height 200}]
                      (make-frets x0 y0 ["I" "II" "III" "IV" ""])
                      (make-strings x0 y0)
-                     (finger-circle x0 0 y0 0 "1" true)))))))
+                     (circle-row x0 y0 ["1R" "1" "1" "1" "1" "1R"])
+                     (circle-row x0 (+ y0 30) [])
+                     (circle-row x0 (+ y0 30 30) ["" "3" "3R" "3" "" ""])
+                     (circle-row x0 (+ y0 30 30 30) ["4" "" "" "" "4" "4"])))))))
+
