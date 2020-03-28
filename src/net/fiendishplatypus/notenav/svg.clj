@@ -121,7 +121,7 @@
 ;;       dy is 30
 (defn finger-circle [x dx y dy text]
   (let [root? (clojure.string/includes? text "R")
-        text (clojure.string/replace text "R" "")
+        text  (clojure.string/replace text "R" "")
         style (if root?
                 {:circle-fill "red"
                  :text-fill   "white"
@@ -145,10 +145,10 @@
 
 (defn circle-row [x0 y0 row]
   (reduce concat []
-    (let [joined-row (into [] (map (fn [a b] [a b]) (ladder 0 20 row) row))]
-      (for [[dx finger-number] joined-row
-            :when ((complement empty?) finger-number)]
-        (finger-circle x0 dx y0 0 finger-number)))))
+          (let [joined-row (into [] (map (fn [a b] [a b]) (ladder 0 20 row) row))]
+            (for [[dx finger-number] joined-row
+                  :when ((complement empty?) finger-number)]
+              (finger-circle x0 dx y0 0 finger-number)))))
 
 
 (comment
@@ -165,4 +165,30 @@
                      (circle-row x0 (+ y0 30) [])
                      (circle-row x0 (+ y0 30 30) ["" "3" "3R" "3" "" ""])
                      (circle-row x0 (+ y0 30 30 30) ["4" "" "" "" "4" "4"])))))))
+
+
+(defn make-finger-circles [x0 y0 finger-placement]
+  (reduce concat []
+          (for [[dy row] (into [] (map (fn [a b] [a b])
+                                       (ladder 0 30 finger-placement)
+                                       finger-placement))]
+            (circle-row x0 (+ y0 dy) row))))
+
+
+(comment
+  "Minor pentatonic scale variant 1"
+  (spit "minor-pentatonic-1.svg"
+        (let [x0 10 y0 10]
+          (xml/emit
+            (apply svg/svg
+                   (concat
+                     [{:width 200 :height 200}]
+                     (make-frets x0 y0 ["I" "II" "III" "IV" ""])
+                     (make-strings x0 y0)
+                     (make-finger-circles x0 y0 [["1R" "1" "1" "1" "1" "1R"]
+                                                 []
+                                                 ["" "3" "3R" "3" "" ""]
+                                                 ["4" "" "" "" "4" "4"]])))))))
+
+
 
