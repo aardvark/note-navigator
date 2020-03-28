@@ -82,9 +82,20 @@
   [(hline (+ y 10 dy) (+ x 30) (+ x 150))
    (xml/add-attrs (svg/text fret-number) :x x :y (+ y 30 dy))])
 
+;; [0 30 60 90]
+(defn ladder [start step base]
+ (loop [start start
+        step step
+        length (count base)
+        res []]
+   (if (< (count res) length)
+     (recur (+ start step) step length (cons start res))
+     (into [] (reverse res)))))
+
+
 (defn make-frets [x y frets]
   (reduce concat []
-          (let [a   [0 30 60 90]
+          (let [a   (ladder 0 30 frets)
                 dys (into [] (map (fn [a b] [a b]) a frets))]
             (for [dy dys]
               (make-fret x y dy)))))
@@ -105,7 +116,7 @@
                    (make-strings 60 95))))))
 
 
-(defn finger-circle [x dx y dy & root?]
+(defn finger-circle [x dx y dy text & root?]
   (let [style (if root?
                 {:circle-fill "red"
                  :text-fill   "white"
@@ -114,7 +125,7 @@
                  :text-fill   "black"
                  :text-stroke "black"})]
     [(svg/circle (+ x 40 dx) (+ y 25 dy) 9 :fill (style :circle-fill) :stroke "black" :stroke-width "1")
-     (xml/add-attrs (svg/text "1") :x (+ x 36 dx) :y (+ y 30 dy) :stroke (style :text-stroke) :fill (style :text-fill))]))
+     (xml/add-attrs (svg/text text) :x (+ x 36 dx) :y (+ y 30 dy) :stroke (style :text-stroke) :fill (style :text-fill))]))
 
 (comment
   (spit "test-circles.svg"
@@ -122,5 +133,15 @@
           (apply svg/svg
                  (concat []
                          [{:width 200 :height 200}]
-                         (finger-circle 0 0 0 0 true)
-                         (finger-circle 10 20 10 30))))))
+                         (finger-circle 0 0 0 0 "1" true)
+                         (finger-circle 10 20 10 30 "5"))))))
+(comment
+  (spit "test-fret-string-circles.svg"
+        (let [x0 10 y0 10]
+          (xml/emit
+            (apply svg/svg
+                   (concat
+                     [{:width 200 :height 200}]
+                     (make-frets x0 y0 ["I" "II" "III" "IV" ""])
+                     (make-strings x0 y0)
+                     (finger-circle x0 0 y0 0 "1" true)))))))
