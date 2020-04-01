@@ -1,12 +1,15 @@
 (ns net.fiendishplatypus.notenav.svg
   (:require [analemma.svg :as svg]
             [analemma.xml :as xml]
-            [clojure.string]))
+            [clojure.string]
+            [net.fiendishplatypus.notenav.lookup :as lookup]))
 
-(defn- vline [x y1 y2]
+(defn- vline
+  [x y1 y2]
   (svg/line x y1 x y2 :stroke "black"))
 
-(defn- hline [y x1 x2]
+(defn- hline
+  [y x1 x2]
   (svg/line x1 y x2 y :stroke "black" :stroke-width "3"))
 
 (comment
@@ -79,12 +82,14 @@
                    (make-strings x y))))))
 
 
-(defn- make-fret [x y [dy fret-number]]
+(defn- make-fret
+  [x y [dy fret-number]]
   [(hline (+ y 10 dy) (+ x 30) (+ x 150))
    (xml/add-attrs (svg/text fret-number) :x x :y (+ y 30 dy))])
 
 ;; [0 30 60 90]
-(defn ladder [start step base]
+(defn ladder
+  [start step base]
   (loop [start  start
          step   step
          length (count base)
@@ -94,9 +99,10 @@
       (into [] (reverse res)))))
 
 
-(defn make-frets [x y frets]
+(defn make-frets
+  [x y frets]
   (reduce concat []
-          (let [a   (ladder 0 30 frets)
+          (let [a   (ladder 0 40 frets)
                 dys (into [] (map (fn [a b] [a b]) a frets))]
             (for [dy dys]
               (make-fret x y dy)))))
@@ -119,7 +125,8 @@
 
 ;;circle dx is 20
 ;;       dy is 30
-(defn finger-circle [x dx y dy text]
+(defn finger-circle
+  [x dx y dy text]
   (let [root? (clojure.string/includes? text "R")
         text  (clojure.string/replace text "R" "")
         style (if root?
@@ -143,7 +150,8 @@
                          (finger-circle 10 20 10 30 "5"))))))
 
 
-(defn circle-row [x0 y0 row]
+(defn circle-row
+  [x0 y0 row]
   (reduce concat []
           (let [joined-row (into [] (map (fn [a b] [a b]) (ladder 0 20 row) row))]
             (for [[dx finger-number] joined-row
@@ -167,10 +175,11 @@
                      (circle-row x0 (+ y0 30 30 30) ["4" "" "" "" "4" "4"])))))))
 
 
-(defn make-finger-circles [x0 y0 finger-placement]
+(defn make-finger-circles
+  [x0 y0 finger-placement]
   (reduce concat []
           (for [[dy row] (into [] (map (fn [a b] [a b])
-                                       (ladder 0 30 finger-placement)
+                                       (ladder 14 40 finger-placement)
                                        finger-placement))]
             (circle-row x0 (+ y0 dy) row))))
 
@@ -191,4 +200,93 @@
                                                  ["4" "" "" "" "4" "4"]])))))))
 
 
+(defn note
+  [x0 dx y0 dy note]
+  (let [effX (+ x0 dx)
+        effY (+ y0 dy)]
+    [(svg/rect effX (- effY 11) 13 22 :fill "white")
+     (xml/add-attrs (svg/text note)
+                    :x effX
+                    :y effY
+                    :stroke "black"
+                    :font-size "0.6em"
+                    :font-family "JetBrains Mono")]))
 
+
+(defn note-row
+  [x0 y0 row]
+  (reduce concat []
+          (let [joined-row (into [] (map (fn [a b] [a b]) (ladder 0 20 row) row))]
+            (for [[dx tone] joined-row
+                  :when ((complement empty?) tone)]
+              (note x0 dx y0 0 tone)))))
+
+
+(defn make-notes
+  [x0 y0 notes]
+  (reduce concat []
+          (for [[dy row] (into [] (map (fn [a b] [a b])
+                                       (ladder 14 40 notes)
+                                       notes))]
+            (note-row x0 (+ y0 dy) row))))
+
+(spit "test-notes.svg"
+      (xml/emit
+        (apply svg/svg
+               (concat [{:width 100 :height 100}]
+                       (note 0 0 0 0 "E#3")))))
+
+(conj [] (lookup/pprint-note (lookup/note 6 5))
+      (lookup/pprint-note (lookup/note 5 5))
+      (lookup/pprint-note (lookup/note 4 5))
+      (lookup/pprint-note (lookup/note 3 5))
+      (lookup/pprint-note (lookup/note 2 5))
+      (lookup/pprint-note (lookup/note 1 5)))
+
+(comment
+  "Minor pentatonic scale variant 1 with notes"
+  (spit "minor-pentatonic-with-notes.svg"
+        (let [x0        10 y0 10
+              input     {:1 ["1R" "1" "1" "1" "1" "1R"]
+                         :2 []
+                         :3 ["" "3" "3R" "3" "" ""]
+                         :4 ["4" "" "" "" "4" "4"]}
+              fret-dict {:1 "I" :2 "II" :3 "III" :4 "IV"}
+              frets     (vals (select-keys fret-dict (keys input)))]
+          (xml/emit
+            (apply svg/svg
+                   (concat
+                     [{:width 200 :height 200}]
+                     (make-frets x0 y0 (conj (vec frets) ""))
+                     (make-strings x0 y0)
+                     (make-finger-circles x0 y0 [["1R" "1" "1" "1" "1" "1R"]
+                                                 []
+                                                 ["" "3" "3R" "3" "" ""]
+                                                 ["4" "" "" "" "4" "4"]])
+                     (make-notes (+ x0 32) (+ y0 10) [["E#6" "E#5" "E#4" "E#3" "E#2" "E#1"] ["E3"]])))))))
+
+
+(defn to-strings
+  "Translate finger circles to the strings for future note assignment"
+  [xs]
+  (loop [xs    xs
+         out   []
+         start 6]
+    (let [a (first xs)]
+      (if (empty? xs)
+        out
+        (recur (rest xs)
+               (conj out (if (empty? a) "" start))
+               (- start 1))))))
+
+
+(comment
+  (map to-strings (vals {:1 ["1R" "1" "1" "1" "1" "1R"]
+                         :2 []
+                         :3 ["" "3" "3R" "3" "" ""]
+                         :4 ["4" "" "" "" "4" "4"]}))
+  "returns"
+  [[6 5 4 3 2 1]
+   []
+   ["" 5 4 3 "" ""]
+   [6 "" "" "" 2 1]])

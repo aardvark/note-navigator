@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="250" height="250">
+  <font>
+    <font-face font-family="JetBrains Mono" />
+    <!-- and so on -->
+  </font>
+  <text font-family="JetBrains Mono" x="10" y="10">My text uses Super Sans</text>
+</svg>
