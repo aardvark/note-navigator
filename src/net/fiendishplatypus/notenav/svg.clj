@@ -70,8 +70,9 @@
               [(xml/add-attrs
                  (svg/text (str (swap! sn - 1)))
                  :x (+ start-x (- dx 5))
-                 :y start-y)
-               (vline (+ start-x dx) (+ start-y 5) (+ start-y 155))]))))
+                 :y start-y
+                 :font-family "JetBrains Mono")
+               (vline (+ start-x dx) (+ start-y 5) (+ start-y 175))]))))
 
 (comment
   (spit "test-strings.svg"
@@ -85,7 +86,9 @@
 (defn- make-fret
   [x y [dy fret-number]]
   [(hline (+ y 10 dy) (+ x 30) (+ x 150))
-   (xml/add-attrs (svg/text fret-number) :x x :y (+ y 30 dy))])
+   (xml/add-attrs (svg/text fret-number)
+                  :x x :y (+ y 35 dy)
+                  :font-family "JetBrains Mono")])
 
 ;; [0 30 60 90]
 (defn ladder
@@ -137,7 +140,9 @@
                  :text-fill   "black"
                  :text-stroke "black"})]
     [(svg/circle (+ x 40 dx) (+ y 25 dy) 9 :fill (style :circle-fill) :stroke "black" :stroke-width "1")
-     (xml/add-attrs (svg/text text) :x (+ x 36 dx) :y (+ y 30 dy) :stroke (style :text-stroke) :fill (style :text-fill))]))
+     (xml/add-attrs (svg/text text) :x (+ x 35 dx) :y (+ y 31 dy)
+                    :stroke (style :text-stroke) :fill (style :text-fill)
+                    :font-family "JetBrains Mono")]))
 
 
 (comment
@@ -230,41 +235,6 @@
                                        notes))]
             (note-row x0 (+ y0 dy) row))))
 
-(spit "test-notes.svg"
-      (xml/emit
-        (apply svg/svg
-               (concat [{:width 100 :height 100}]
-                       (note 0 0 0 0 "E#3")))))
-
-(conj [] (lookup/pprint-note (lookup/note 6 5))
-      (lookup/pprint-note (lookup/note 5 5))
-      (lookup/pprint-note (lookup/note 4 5))
-      (lookup/pprint-note (lookup/note 3 5))
-      (lookup/pprint-note (lookup/note 2 5))
-      (lookup/pprint-note (lookup/note 1 5)))
-
-(comment
-  "Minor pentatonic scale variant 1 with notes"
-  (spit "minor-pentatonic-with-notes.svg"
-        (let [x0        10 y0 10
-              input     {:1 ["1R" "1" "1" "1" "1" "1R"]
-                         :2 []
-                         :3 ["" "3" "3R" "3" "" ""]
-                         :4 ["4" "" "" "" "4" "4"]}
-              fret-dict {:1 "I" :2 "II" :3 "III" :4 "IV"}
-              frets     (vals (select-keys fret-dict (keys input)))]
-          (xml/emit
-            (apply svg/svg
-                   (concat
-                     [{:width 200 :height 200}]
-                     (make-frets x0 y0 (conj (vec frets) ""))
-                     (make-strings x0 y0)
-                     (make-finger-circles x0 y0 [["1R" "1" "1" "1" "1" "1R"]
-                                                 []
-                                                 ["" "3" "3R" "3" "" ""]
-                                                 ["4" "" "" "" "4" "4"]])
-                     (make-notes (+ x0 32) (+ y0 10) [["E#6" "E#5" "E#4" "E#3" "E#2" "E#1"] ["E3"]])))))))
-
 
 (defn to-strings
   "Translate finger circles to the strings for future note assignment"
@@ -278,6 +248,40 @@
         (recur (rest xs)
                (conj out (if (empty? a) "" start))
                (- start 1))))))
+
+
+(defn print-note
+  [string fret]
+  (lookup/pprint-note (lookup/note string fret)))
+
+(defn keyword->int
+  [k]
+  (Integer/parseInt (name k)))
+
+
+(defn to-note-row
+  [[fret strings]]
+  (map #(print-note %1 (keyword->int fret)) strings))
+
+
+(comment
+  "Minor pentatonic scale variant 1 with notes"
+  (spit "minor-pentatonic-with-notes.svg"
+        (let [x0        10 y0 10
+              input     {:5 ["1R" "1" "1" "1" "1" "1R"]
+                         :6 []
+                         :7 ["" "3" "3R" "3" "" ""]
+                         :8 ["4" "" "" "" "4" "4"]}
+              frets     (map (comp str keyword->int) (keys input))
+              notes     (map (comp to-note-row (fn [[k v]] [k (to-strings v)])) input)]
+          (xml/emit
+            (apply svg/svg
+                   (concat
+                     [{:width 200 :height 200}]
+                     (make-frets x0 y0 (conj (vec frets) ""))
+                     (make-strings x0 y0)
+                     (make-finger-circles x0 y0 (vals input))
+                     (make-notes (+ x0 32) (+ y0 10) notes)))))))
 
 
 (comment
