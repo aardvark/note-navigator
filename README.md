@@ -2,7 +2,7 @@
 
 # Notenav
 
-A Clojure library designed to work with notes on guitar. 
+A Clojure library designed to help with learning guitar and music theory. 
 
 ## Usage
 
