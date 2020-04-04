@@ -63,6 +63,8 @@
 
 
 (defn make-strings
+  "Draw six string lines"
+  ;;TODO: vertical length should be based on a number of frets passed, currently it is hardcoded"
   [start-x start-y]
   (reduce concat []
           (let [sn (atom 7)]
@@ -263,6 +265,32 @@
   [[fret strings]]
   (map #(print-note %1 (keyword->int fret)) strings))
 
+
+(defn fingerboard
+  "Create svg fingerboard diagram.
+   Can be used to display finger placement in scales.
+   `input` should be a map of frets to the vector of finger position on string.
+   1,2,3,4 are treated as a finger numbers. Adding \"R\" to the finger number
+   indicate a root note.
+
+   For example Am chord can be encoded like this:
+    {:1 [\"\" \"\" \"\" \"\" \"1\" \"\"]
+     :2 [\"\" \"\" \"3\" \"2\" \"\" \"\"]}
+     "
+  ;; TODO: add ability to mark open and muted strings for chords
+  ([input]
+   (fingerboard input 10 10))
+  ([input x0 y0]
+   (let [frets     (map (comp str keyword->int) (keys input))
+         notes     (map (comp to-note-row (fn [[k v]] [k (to-strings v)])) input)]
+     (xml/emit
+       (apply svg/svg
+              (concat
+                [{:width 200 :height 200}]
+                (make-frets x0 y0 (conj (vec frets) ""))
+                (make-strings x0 y0)
+                (make-finger-circles x0 y0 (vals input))
+                (make-notes (+ x0 32) (+ y0 10) notes)))))))
 
 (comment
   "Minor pentatonic scale variant 1 with notes"
