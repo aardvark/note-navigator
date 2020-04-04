@@ -6,7 +6,14 @@ A Clojure library designed to work with notes on guitar.
 
 ## Usage
 
-Hopefully.
+```lookup.clj``` find/lookup notes or fret positions
+
+```svg.clj``` create diagrams in svg.
+
+```svg/fingerboard``` can be used to create a fingerboard diagrams 
+for chords and scales
+
+![Minor pentatonic 1](doc/minor-pentatonic-with-notes.svg)
 
 ## License
 

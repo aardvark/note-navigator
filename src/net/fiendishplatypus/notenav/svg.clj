@@ -295,7 +295,7 @@
 (comment
   "Minor pentatonic scale variant 1 with notes"
   (spit "minor-pentatonic-with-notes.svg"
-        (let [x0        10 y0 10
+        (let [x0        5 y0 15
               input     {:5 ["1R" "1" "1" "1" "1" "1R"]
                          :6 []
                          :7 ["" "3" "3R" "3" "" ""]
@@ -313,10 +313,11 @@
 
 
 (comment
-  (map to-strings (vals {:1 ["1R" "1" "1" "1" "1" "1R"]
-                         :2 []
-                         :3 ["" "3" "3R" "3" "" ""]
-                         :4 ["4" "" "" "" "4" "4"]}))
+  (fingerboard {:1 ["1R" "1" "1" "1" "1" "1R"]
+                :2 []
+                :3 ["" "3" "3R" "3" "" ""]
+                :4 ["4" "" "" "" "4" "4"]}
+               10 15))
   "returns"
   [[6 5 4 3 2 1]
    []
