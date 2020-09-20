@@ -2,7 +2,7 @@
 
 # Notenav
 
-A Clojure library designed to help with learning guitar and music theory. 
+A Clojure library designed to help with learning guitar and music theory.
 
 ## Usage
 
@@ -10,8 +10,17 @@ A Clojure library designed to help with learning guitar and music theory.
 
 ```svg.clj``` create diagrams in svg.
 
-```svg/fingerboard``` can be used to create a fingerboard diagrams 
-for chords and scales
+```svg/fingerboard``` can be used to create a fingerboard diagrams
+for chords and scales.
+
+Calling:
+```
+(svg/fingerboard {:5 ["1R" "1" "1" "1" "1" "1R"]
+                  :6 []
+                  :7 ["" "3" "3R" "3" "" ""]
+                  :8 ["4" "" "" "" "4" "4"]})
+```
+Will produce:
 
 ![Minor pentatonic 1](doc/minor-pentatonic-with-notes.svg)
 
