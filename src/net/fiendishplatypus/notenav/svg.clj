@@ -209,7 +209,10 @@
 
 (defn note
   [x0 dx y0 dy note]
-  (let [effX (+ x0 dx)
+  (let [dx (if (= 3 (count note))
+               dx
+               (+ 3 dx))
+        effX (+ x0 dx)
         effY (+ y0 dy)]
     [(svg/rect effX (- effY 11) 13 22 :fill "white")
      (xml/add-attrs (svg/text note)
@@ -223,7 +226,9 @@
 (defn note-row
   [x0 y0 row]
   (reduce concat []
-          (let [joined-row (into [] (map (fn [a b] [a b]) (ladder 0 20 row) row))]
+          (let [joined-row (into [] (map (fn [a b] [a b]) 
+                                         (ladder 0 20 row)
+                                         row))]
             (for [[dx tone] joined-row
                   :when ((complement empty?) tone)]
               (note x0 dx y0 0 tone)))))
@@ -313,13 +318,19 @@
 
 
 (comment
-  (fingerboard {:1 ["1R" "1" "1" "1" "1" "1R"]
-                :2 []
-                :3 ["" "3" "3R" "3" "" ""]
-                :4 ["4" "" "" "" "4" "4"]}
-               10 15)
-  "returns"
-  [[6 5 4 3 2 1]
-   []
-   ["" 5 4 3 "" ""]
-   [6 "" "" "" 2 1]])
+  (spit "minor-pentatonic-with-notes.svg"
+        (fingerboard {:4 ["1R" "1" "1" "1" "1" "1R"]
+                      :5 []
+                      :6 ["" "3" "3R" "3" "" ""]
+                      :7 ["4" "" "" "" "4" "4"]}
+                     20 20))
+  (map (comp to-note-row (fn [[k v]] [k (to-strings v)])) {:4 ["1R" "1" "1" "1" "1" "1R"]
+                                                           :5 []
+                                                           :6 ["" "3" "3R" "3" "" ""]
+                                                           :7 ["4" "" "" "" "4" "4"]})
+  ;; =>
+  ;;  (("G#1" "C#2" "F#2" "B2" "D#3" "G#3")
+  ;;  () 
+  ;;  ("" "D#2" "G#2" "C#3" "" "") 
+  ;;  ("B1" "" "" "" "F#3" "B3"))
+)
