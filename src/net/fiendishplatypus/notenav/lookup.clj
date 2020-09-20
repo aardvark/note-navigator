@@ -97,14 +97,15 @@
                                (reverse string->fret->note)))]))
 
 
-(defn lookup-position [note octave]
-  {::string 6 ::fret 0})
-
-(calculate-string {::note "E" ::octave 1} 12)
-
-(defn- find-by-note [note]
+(defn- find-by-note 
+  [note]
   (filter
     (fn [[_ v]] (= (::note v) note))))
+
+(defn- find-by-octave 
+  [octave]
+  (filter 
+   (fn [[_ v]] (= (::octave v) octave))))
 
 
 (defn lookup-note
@@ -116,9 +117,46 @@
 
 (comment
   (lookup-note "A"))
+  ;; => {6 {5 #:net.fiendishplatypus.notenav.lookup{:note "A", :octave 1}},
+  ;;     5 {0 #:net.fiendishplatypus.notenav.lookup{:note "A", :octave 1},
+  ;;        12 #:net.fiendishplatypus.notenav.lookup{:note "A", :octave 2}},
+  ;;     4 {7 #:net.fiendishplatypus.notenav.lookup{:note "A", :octave 2}},
+  ;;     3 {2 #:net.fiendishplatypus.notenav.lookup{:note "A", :octave 2}},
+  ;;     2 {10 #:net.fiendishplatypus.notenav.lookup{:note "A", :octave 3}},
+  ;;     1 {5 #:net.fiendishplatypus.notenav.lookup{:note "A", :octave 3}}}
 
-;;;; Test run
+
+(defn lookup-note-octave
+  [note octave]
+  (into {} (map
+            (fn [[string fret+notes]]
+              [string (into {} (comp (find-by-note note)
+                                     (find-by-octave octave))
+                        fret+notes)])
+            string->fret->note)))
+
+
+(defn lookup-position
+  "Given note and octave return a list of locations map on the fret
+   where this note can be taken.
+   Assumes standart western tuning for guitar."
+  [note octave]
+  (mapcat
+   (fn [[k v]]
+     (let [string {::string k}]
+       (for [fret-and-note v]
+         (assoc string ::fret (key fret-and-note)))))
+   (lookup-note-octave note octave)))
+
 (comment
-  (require '[clojure.test :as test])
-  (test/run-tests (symbol (str (.getName *ns*) "-test"))))
+  (lookup-note-octave "A" 1)
+;; => {6 {5 #:net.fiendishplatypus.notenav.lookup{:note "A", :octave 1}},
+;;     5 {0 #:net.fiendishplatypus.notenav.lookup{:note "A", :octave 1}},
+;;     4 {},
+;;     3 {},
+;;     2 {},
+;;     1 {}}
 
+  (lookup-position "A" 1))
+;; => (#:net.fiendishplatypus.notenav.lookup{:string 6, :fret 5} 
+;;     #:net.fiendishplatypus.notenav.lookup{:string 5, :fret 0})
