@@ -25,6 +25,17 @@
     (is (= (lookup/pad-note "E1") "|-E1--"))
     (is (= (lookup/pad-note "F#1") "|-F#1-"))))
 
+(deftest upscale-test
+  (testing "`upscale` increases passed tone by semitone."
+    (testing "Tone shift. Given: C1 should return C#1."
+      (is (= {::lookup/note "C#" ::lookup/octave 1}
+             (lookup/upscale {::lookup/note "C" ::lookup/octave 1}))))
+    (testing "Octave shift. Given: B1 should return C2. "
+      (is (= {::lookup/note "C" ::lookup/octave 2}
+             (lookup/upscale {::lookup/note "B" ::lookup/octave 1}))))
+    (testing "Tone shift. Given tone shifts will shift by number of semitones"
+      (is (= {::lookup/note "D" ::lookup/octave 1}
+             (lookup/upscale {::lookup/note "C" ::lookup/octave 1} 2))))))
 
 (defn run-tests 
   []

@@ -8,17 +8,35 @@
   ["C" "C#" "D" "D#" "E" "F" "F#" "G" "G#" "A" "A#" "B"])
 
 
-(defn upscale [{::keys [note octave]}]
-  (loop [note   note
-         octave octave
-         scale  tuning-scale]
-    (cond
-      (and (= note (first scale))
-           (not (nil? (second scale))))
-      {::note (second scale) ::octave octave}
+(defn upscale 
+  ([{::keys [note octave]}]
+   (loop [note   note
+          octave octave
+          scale  tuning-scale]
+     (cond
+       (and (= note (first scale))
+            (not (nil? (second scale))))
+       {::note (second scale) ::octave octave}
 
-      (nil? (first scale)) {::note "C" ::octave (inc octave)}
-      :else (recur note octave (drop 1 scale)))))
+       (nil? (first scale)) 
+       {::note "C" ::octave (inc octave)}
+       
+       :else 
+       (recur note octave (drop 1 scale)))))
+  
+  ([{::keys [note octave]} shifts]
+   (loop [note note 
+          octave octave 
+          shifts-left shifts]
+     (if (= 0 shifts-left)
+         {::note note ::octave octave}
+         (let [{::keys [note octave]} 
+               (upscale {::note note ::octave octave})]
+              (recur note octave (dec shifts-left)))))))
+
+(comment
+  (upscale (upscale {::note "C" ::octave 1}))
+  (upscale {::note "C" ::octave 1}))
 
 
 (defn calculate-string [starting-note frets]
