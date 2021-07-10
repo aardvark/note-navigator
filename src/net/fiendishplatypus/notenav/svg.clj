@@ -64,17 +64,31 @@
 
 (defn make-strings
   "Draw six string lines"
-  ;;TODO: vertical length should be based on a number of frets passed, currently it is hardcoded"
-  [start-x start-y]
-  (reduce concat []
-          (let [sn (atom 7)]
-            (for [dx [40 60 80 100 120 140]]
-              [(xml/add-attrs
+  ;;TODO: vertical length should 
+  ;;be based on a number of frets passed, currently it is hardcoded"
+  ;;
+  ([start-x start-y]
+   (reduce concat []
+           (let [sn (atom 7)]
+             (for [dx [40 60 80 100 120 140]]
+               [(xml/add-attrs
                  (svg/text (str (swap! sn - 1)))
                  :x (+ start-x (- dx 5))
                  :y start-y
                  :font-family "JetBrains Mono")
-               (vline (+ start-x dx) (+ start-y 5) (+ start-y 175))]))))
+                (vline (+ start-x dx) (+ start-y 5) (+ start-y 175))]))))
+  ([n-of-frets start-x start-y]
+   (reduce concat []
+           (let [sn (atom 7)
+                 end-y (* 44 n-of-frets)]
+             (for [dx [40 60 80 100 120 140]]
+               [(xml/add-attrs
+                 (svg/text (str (swap! sn - 1)))
+                 :x (+ start-x (- dx 5))
+                 :y start-y
+                 :font-family "JetBrains Mono")
+                (vline (+ start-x dx) (+ start-y 5) (+ start-y end-y))])))
+   ))
 
 (comment
   (spit "test-strings.svg"
@@ -173,14 +187,14 @@
           (xml/emit
             (apply svg/svg
                    (concat
-                     [{:width 200 :height 200}]
-                     (make-frets x0 y0 ["I" "II" "III" "IV" ""])
+                     [{:width 400 :height 400}]
+                     (make-frets x0 y0 ["I" "II" "III" "IV" "V" "VI"])
                      (make-strings x0 y0)
                      (circle-row x0 y0 ["1R" "1" "1" "1" "1" "1R"])
                      (circle-row x0 (+ y0 30) [])
                      (circle-row x0 (+ y0 30 30) ["" "3" "3R" "3" "" ""])
-                     (circle-row x0 (+ y0 30 30 30) ["4" "" "" "" "4" "4"])))))))
-
+                     (circle-row x0 (+ y0 30 30 30) ["4" "" "" "" "4" "4"])
+                     (circle-row x0 (+ y0 30 30 30 30) ["4" "" "" "" "4" "4"])))))))
 
 (defn make-finger-circles
   [x0 y0 finger-placement]
@@ -256,6 +270,11 @@
                (conj out (if (empty? a) "" start))
                (- start 1))))))
 
+(comment
+  (to-strings ["" "" "" "1" "" "1"]))
+;; => ["" "" "" 3 "" 1]
+
+
 
 (defn print-note
   [string fret]
@@ -275,8 +294,8 @@
   "Create svg fingerboard diagram.
    Can be used to display finger placement in scales.
    `input` should be a map of frets to the vector of finger position on string.
-   1,2,3,4 are treated as a finger numbers. Adding \"R\" to the finger number
-   indicate a root note.
+   1,2,3,4 are treated as a finger numbers, empty string treated as no notation 
+   required. Adding \"R\" to the finger number indicate a root note.
 
    For example Am chord can be encoded like this:
     {:1 [\"\" \"\" \"\" \"\" \"1\" \"\"]
@@ -286,14 +305,21 @@
   ([input]
    (fingerboard input 10 10))
   ([input x0 y0]
-   (let [frets     (map (comp str keyword->int) (keys input))
+   (fingerboard input x0 y0 {:width 200 :height 200}))
+  ([input x0 y0 {:keys [width height]}]
+   
+   (let [input (into (sorted-map-by (fn [a b]
+                                 (< (keyword->int a)
+                                    (keyword->int b)))) 
+                     input)
+         frets     (map (comp str keyword->int) (keys input))
          notes     (map (comp to-note-row (fn [[k v]] [k (to-strings v)])) input)]
      (xml/emit
        (apply svg/svg
               (concat
-                [{:width 200 :height 200}]
+                [{:width width :height height}]
                 (make-frets x0 y0 (conj (vec frets) ""))
-                (make-strings x0 y0)
+                (make-strings (count frets) x0 y0)
                 (make-finger-circles x0 y0 (vals input))
                 (make-notes (+ x0 32) (+ y0 10) notes)))))))
 
@@ -312,7 +338,7 @@
                    (concat
                      [{:width 200 :height 200}]
                      (make-frets x0 y0 (conj (vec frets) ""))
-                     (make-strings x0 y0)
+                     (make-strings  x0 y0)
                      (make-finger-circles x0 y0 (vals input))
                      (make-notes (+ x0 32) (+ y0 10) notes)))))))
 
@@ -333,4 +359,62 @@
   ;;  () 
   ;;  ("" "D#2" "G#2" "C#3" "" "") 
   ;;  ("B1" "" "" "" "F#3" "B3"))
+
+(comment
+  (let [inp {:1 '("" "" "" "" "0" "0")
+             :2 '("" "" "" "" "" "")
+             :3 '("" "" "" "" "0" "0")
+             :4 '("" "" "" "" "0" "0")
+             :5 '("" "" "" "0" "" "")
+             :6 '("" "" "" "" "0" "0")
+             :7 '("" "" "" "0" "" "")
+             :8 '("" "" "" "0" "0" "0")
+             :9 '("" "" "" "" "0" "")
+             :10 '("" "" "0" "0" "" "")
+             :11 '("" "" "" "" "0" "")
+             :12 '("" "" "0" "0" "" "")}]
+
+    (map (comp to-note-row (fn [[k v]] [k (to-strings v)])) inp)
+    inp)
+
+  
+
+  
+  
+  (spit "C3-minor.svg"
+        (fingerboard
+         {:1 '("" "" "" "" "0" "0")
+          :2 '("" "" "" "" "" "")
+          :3 '("" "" "" "" "0" "0")
+          :4 '("" "" "" "" "0" "0")
+          :5 '("" "" "" "0" "" "")
+          :6 '("" "" "" "" "0" "0")
+          :7 '("" "" "" "0" "" "")
+          :8 '("" "" "" "0" "0" "0")
+          :9 '("" "" "" "" "0" "")
+          :10 '("" "" "0" "0" "" "")
+          :11 '("" "" "" "" "0" "")
+          :12 '("" "" "0" "0" "" "")}
+         20 20 {:width 200 :height 800})))
+
+(comment
+  (into
+   (sorted-map-by (fn [a b]
+                    (< (keyword->int a)
+                       (keyword->int b))
+                    ))
+   {:1 '("" "" "" "" "0" "0")
+    :2 '("" "" "" "" "" "")
+    :3 '("" "" "" "" "0" "0")
+    :4 '("" "" "" "" "0" "0")
+    :5 '("" "" "" "0" "" "")
+    :6 '("" "" "" "" "0" "0")
+    :7 '("" "" "" "0" "" "")
+    :8 '("" "" "" "0" "0" "0")
+    :9 '("" "" "" "" "0" "")
+    :10 '("" "" "0" "0" "" "")
+    :11 '("" "" "" "" "0" "")
+    :12 '("" "" "0" "0" "" "")}))
+
+
 
