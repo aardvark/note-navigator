@@ -24,6 +24,14 @@ Will produce:
 
 ![Minor pentatonic 1](doc/minor-pentatonic-with-notes.svg)
 
+Can create scale diagrams like this:
+```
+(fingerboard
+    (scale/to-diagram "A" scale/major)
+    20 20 {:width 200 :height 800}))
+```
+![Scale A major](doc/A-major2.svg)
+
 ## License
 
 Copyright © 2020 Evgeniy Latuhin
