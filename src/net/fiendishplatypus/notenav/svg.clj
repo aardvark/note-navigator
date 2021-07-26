@@ -2,7 +2,8 @@
   (:require [analemma.svg :as svg]
             [analemma.xml :as xml]
             [clojure.string]
-            [net.fiendishplatypus.notenav.lookup :as lookup]))
+            [net.fiendishplatypus.notenav.lookup :as lookup]
+            [net.fiendishplatypus.notenav.scale :as scale]))
 
 (defn- vline
   [x y1 y2]
@@ -395,7 +396,27 @@
           :10 '("" "" "0" "0" "" "")
           :11 '("" "" "" "" "0" "")
           :12 '("" "" "0" "0" "" "")}
-         20 20 {:width 200 :height 800})))
+         20 20 {:width 200 :height 800}))
+  (spit "A-major.svg"
+        (fingerboard
+         {:0 '("3" "6" "2" "5" "7" "3")
+          :1 '("4" "" "" "" "R" "4")
+          :2 '("" "7" "3" "6" "" "")
+          :3 '("5" "R" "4" "" "2" "5")
+          :4 '("" "" "" "7" "" "")
+          :5 '("6" "2" "5" "R" "3" "6")
+          :6 '("" "" "" "" "4" "")
+          :7 '("7" "3" "6" "2" "" "7")
+          :8 '("R" "4" "" "" "5" "R")
+          :9 '("" "" "7" "3" "" "")
+          :10 '("2" "5" "R" "4" "6" "")
+          :12 '("3" "6" "2" "5" "7" "")}
+         20 20 {:width 200 :height 800}))
+  (spit "A-major2.svg"
+        (fingerboard
+         (scale/to-diagram "A" scale/major)
+         20 20 {:width 200 :height 800}))  
+  )
 
 (comment
   (into

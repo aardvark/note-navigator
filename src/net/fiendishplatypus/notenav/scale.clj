@@ -1,7 +1,8 @@
 (ns net.fiendishplatypus.notenav.scale
-  (:require [net.fiendishplatypus.notenav.lookup :as l]))
+  (:require [net.fiendishplatypus.notenav.lookup :as l]
+            [clojure.string :as s]))
 
-(def major 
+(def major
   "Major scale in semitones"
   [2 2 1 2 2 2 1 1])
 
@@ -9,7 +10,7 @@
   "Minor scale in semitones"
   [2 1 2 2 1 2 2 1])
 
-(defn scale 
+(defn scale
   "Given a root note and a scale type 
    produce list of notes in a scale"
   [root-note scale]
@@ -18,13 +19,13 @@
          acc '()]
     (if (empty? scale)
       (reverse acc)
-      (recur 
-       (rest scale) 
+      (recur
+       (rest scale)
        (l/upscale note (first scale))
        (conj acc note)))))
 
 (comment
-  (scale {::l/note "C" ::l/octave 3} minor))
+  (scale {::l/note "C" ::l/octave 3} major))
 
 (defn number-to-strings
   ([input]
@@ -71,7 +72,7 @@
                 (transient {}) coll))]
     (into (sorted-map-by #(< (to-int %1) (to-int %2)))
           (map
-           (fn [[k v]] 
+           (fn [[k v]]
              [(keyword (str k)) (number-to-strings v)])
            frets))))
 
@@ -106,10 +107,10 @@
           (scale {::l/note "C" ::l/octave 3} minor))
 
   (let [coll (mapcat (fn [[n {::l/keys [note octave]}]]
-                  (map #(assoc % :octave-position n) (l/lookup-position note octave)))
-                (zipmap
-                 (range 1 9)
-                 (scale {::l/note "C" ::l/octave 3} minor)))
+                       (map #(assoc % :octave-position n) (l/lookup-position note octave)))
+                     (zipmap
+                      (range 1 9)
+                      (scale {::l/note "C" ::l/octave 3} minor)))
 
 
         frets (persistent!
@@ -121,17 +122,15 @@
                         octns (conj octns (:octave-position x))]
                     (assoc! acc fret [strs octns])))
                 (transient {}) coll))]
-    frets)
-  
-  )
+    frets))
 
 (defn notes-to-positions-2
   [notes]
   (let [coll
         (mapcat (fn [[n {::l/keys [note octave]}]]
-                  (map #(assoc % :octave-position n) (l/lookup-position note octave)))
+                  (map #(assoc % :octave-position (str n)) (l/lookup-position note octave)))
                 notes)
-        
+
         frets (persistent!
                (reduce
                 (fn [acc x]
@@ -147,6 +146,26 @@
              [(keyword (str k)) (number-to-strings v vv)])
            frets))))
 
-(notes-to-positions-2 (zipmap (range 1 9) (scale {::l/note "C" ::l/octave 3} major)))
 
+(comment
+  (apply merge-with
+         (fn [val-in-res val-in-later]
+           (map (fn [a b] (if (clojure.string/blank? b) a b))
+                val-in-res val-in-later))
+         (cons
+          empty-fret
+          (for [o (list 1 2 3 4 5)]
+            (notes-to-positions-2 (zipmap (list "R" "2" "3" "4" "5" "6" "7" "R") (scale {::l/note "C" ::l/octave o} major))))))
+  )
+            
+(defn to-diagram 
+  [tonic scale-type]
+  (apply merge-with
+         (fn [val-in-res val-in-later]
+           (map (fn [a b] (if (s/blank? b) a b))
+                val-in-res val-in-later))
+         (cons
+          empty-fret
+          (for [o (list 0 1 2 3 4 5)]
+            (notes-to-positions-2 (zipmap (list "R" "2" "3" "4" "5" "6" "7" "R") (scale {::l/note tonic ::l/octave o} scale-type)))))))
 
