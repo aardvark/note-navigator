@@ -65,9 +65,6 @@
 
 (defn make-strings
   "Draw six string lines"
-  ;;TODO: vertical length should 
-  ;;be based on a number of frets passed, currently it is hardcoded"
-  ;;
   ([start-x start-y]
    (reduce concat []
            (let [sn (atom 7)]
@@ -88,8 +85,7 @@
                  :x (+ start-x (- dx 5))
                  :y start-y
                  :font-family "JetBrains Mono")
-                (vline (+ start-x dx) (+ start-y 5) (+ start-y end-y))])))
-   ))
+                (vline (+ start-x dx) (+ start-y 5) (+ start-y end-y))])))))
 
 (comment
   (spit "test-strings.svg"
@@ -107,7 +103,7 @@
                   :x x :y (+ y 35 dy)
                   :font-family "JetBrains Mono")])
 
-;; [0 30 60 90]
+
 (defn ladder
   [start step base]
   (loop [start  start
@@ -229,6 +225,7 @@
                (+ 3 dx))
         effX (+ x0 dx)
         effY (+ y0 dy)]
+    ;;TODO white fill doesn't look nice when background is black
     [(svg/rect effX (- effY 11) 13 22 :fill "white")
      (xml/add-attrs (svg/text note)
                     :x effX
@@ -241,7 +238,7 @@
 (defn note-row
   [x0 y0 row]
   (reduce concat []
-          (let [joined-row (into [] (map (fn [a b] [a b]) 
+          (let [joined-row (into [] (map (fn [a b] [a b])
                                          (ladder 0 20 row)
                                          row))]
             (for [[dx tone] joined-row
@@ -276,10 +273,10 @@
 ;; => ["" "" "" 3 "" 1]
 
 
-
 (defn print-note
   [string fret]
   (lookup/pprint-note (lookup/note string fret)))
+
 
 (defn keyword->int
   [k]
@@ -295,7 +292,7 @@
   "Create svg fingerboard diagram.
    Can be used to display finger placement in scales.
    `input` should be a map of frets to the vector of finger position on string.
-   1,2,3,4 are treated as a finger numbers, empty string treated as no notation 
+   1,2,3,4 are treated as a finger numbers, empty string treated as no notation
    required. Adding \"R\" to the finger number indicate a root note.
 
    For example Am chord can be encoded like this:
@@ -308,10 +305,10 @@
   ([input x0 y0]
    (fingerboard input x0 y0 {:width 200 :height 200}))
   ([input x0 y0 {:keys [width height]}]
-   
+
    (let [input (into (sorted-map-by (fn [a b]
                                  (< (keyword->int a)
-                                    (keyword->int b)))) 
+                                    (keyword->int b))))
                      input)
          frets     (map (comp str keyword->int) (keys input))
          notes     (map (comp to-note-row (fn [[k v]] [k (to-strings v)])) input)]
@@ -357,8 +354,8 @@
                                                            :7 ["4" "" "" "" "4" "4"]}))
   ;; =>
   ;;  (("G#1" "C#2" "F#2" "B2" "D#3" "G#3")
-  ;;  () 
-  ;;  ("" "D#2" "G#2" "C#3" "" "") 
+  ;;  ()
+  ;;  ("" "D#2" "G#2" "C#3" "" "")
   ;;  ("B1" "" "" "" "F#3" "B3"))
 
 (comment
@@ -378,10 +375,6 @@
     (map (comp to-note-row (fn [[k v]] [k (to-strings v)])) inp)
     inp)
 
-  
-
-  
-  
   (spit "C3-minor.svg"
         (fingerboard
          {:1 '("" "" "" "" "0" "0")
@@ -415,7 +408,7 @@
   (spit "A-major2.svg"
         (fingerboard
          (scale/to-diagram "A" scale/major)
-         20 20 {:width 200 :height 800}))  
+         20 20 {:width 200 :height 800}))
   )
 
 (comment

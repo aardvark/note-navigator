@@ -11,7 +11,7 @@
   [2 1 2 2 1 2 2 1])
 
 (defn scale
-  "Given a root note and a scale type 
+  "Given a root note and a scale type
    produce list of notes in a scale"
   [root-note scale]
   (loop [scale scale
@@ -58,79 +58,27 @@
   (Integer/parseInt (name x)))
 
 
+(def empty-fret
+  {:1 '("" "" "" "" "" "")
+   :2 '("" "" "" "" "" "")
+   :3 '("" "" "" "" "" "")
+   :4 '("" "" "" "" "" "")
+   :5 '("" "" "" "" "" "")
+   :6 '("" "" "" "" "" "")
+   :7 '("" "" "" "" "" "")
+   :8 '("" "" "" "" "" "")
+   :9 '("" "" "" "" "" "")
+   :10 '("" "" "" "" "" "")
+   :11 '("" "" "" "" "" "")
+   :12 '("" "" "" "" "" "")})
+
+
 (defn notes-to-positions
   [notes]
-  (let [coll (mapcat (fn [{::l/keys [note octave]}]
-                       (l/lookup-position note octave))
-                     notes)
-        frets (persistent!
-               (reduce
-                (fn [ret x]
-                  (let [k (::l/fret x)]
-                    (assoc! ret k (conj (get ret k [])
-                                        (::l/string x)))))
-                (transient {}) coll))]
-    (into (sorted-map-by #(< (to-int %1) (to-int %2)))
-          (map
-           (fn [[k v]]
-             [(keyword (str k)) (number-to-strings v)])
-           frets))))
-
-(comment
-  (notes-to-positions (scale {::l/note "C" ::l/octave 3} minor))
-
-  (def empty-fret
-    {:1 '("" "" "" "" "" "")
-     :2 '("" "" "" "" "" "")
-     :3 '("" "" "" "" "" "")
-     :4 '("" "" "" "" "" "")
-     :5 '("" "" "" "" "" "")
-     :6 '("" "" "" "" "" "")
-     :7 '("" "" "" "" "" "")
-     :8 '("" "" "" "" "" "")
-     :9 '("" "" "" "" "" "")
-     :10 '("" "" "" "" "" "")
-     :11 '("" "" "" "" "" "")
-     :12 '("" "" "" "" "" "")})
-
-  (into
-   (sorted-map-by #(< (to-int %1) (to-int %2)))
-   (merge empty-fret
-          (notes-to-positions (scale {::l/note "C" ::l/octave 3} minor))))
-
-  (zipmap
-   (range 1 9)
-   (scale {::l/note "C" ::l/octave 3} minor))
-
-  (mapcat (fn [{::l/keys [note octave]}]
-            (l/lookup-position note octave))
-          (scale {::l/note "C" ::l/octave 3} minor))
-
   (let [coll (mapcat (fn [[n {::l/keys [note octave]}]]
-                       (map #(assoc % :octave-position n) (l/lookup-position note octave)))
-                     (zipmap
-                      (range 1 9)
-                      (scale {::l/note "C" ::l/octave 3} minor)))
-
-
-        frets (persistent!
-               (reduce
-                (fn [acc x]
-                  (let [fret (::l/fret x)
-                        [strs octns] (get acc fret [[] []])
-                        strs (conj strs (::l/string x))
-                        octns (conj octns (:octave-position x))]
-                    (assoc! acc fret [strs octns])))
-                (transient {}) coll))]
-    frets))
-
-(defn notes-to-positions-2
-  [notes]
-  (let [coll
-        (mapcat (fn [[n {::l/keys [note octave]}]]
-                  (map #(assoc % :octave-position (str n)) (l/lookup-position note octave)))
+                       (map #(assoc % :octave-position (str n))
+                            (l/lookup-position note octave)))
                 notes)
-
         frets (persistent!
                (reduce
                 (fn [acc x]
@@ -140,25 +88,14 @@
                         octns (conj octns (:octave-position x))]
                     (assoc! acc fret [strs octns])))
                 (transient {}) coll))]
+
     (into (sorted-map-by #(< (to-int %1) (to-int %2)))
-          (map
-           (fn [[k [v vv]]]
-             [(keyword (str k)) (number-to-strings v vv)])
-           frets))))
+          (map (fn [[k [v vv]]]
+                 [(keyword (str k)) (number-to-strings v vv)])
+               frets))))
 
 
-(comment
-  (apply merge-with
-         (fn [val-in-res val-in-later]
-           (map (fn [a b] (if (clojure.string/blank? b) a b))
-                val-in-res val-in-later))
-         (cons
-          empty-fret
-          (for [o (list 1 2 3 4 5)]
-            (notes-to-positions-2 (zipmap (list "R" "2" "3" "4" "5" "6" "7" "R") (scale {::l/note "C" ::l/octave o} major))))))
-  )
-            
-(defn to-diagram 
+(defn to-diagram
   [tonic scale-type]
   (apply merge-with
          (fn [val-in-res val-in-later]
@@ -167,5 +104,6 @@
          (cons
           empty-fret
           (for [o (list 0 1 2 3 4 5)]
-            (notes-to-positions-2 (zipmap (list "R" "2" "3" "4" "5" "6" "7" "R") (scale {::l/note tonic ::l/octave o} scale-type)))))))
+            (notes-to-positions (zipmap (list "R" "2" "3" "4" "5" "6" "7" "R")
+                                        (scale {::l/note tonic ::l/octave o} scale-type)))))))
 
