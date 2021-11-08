@@ -8,7 +8,9 @@
   ["C" "C#" "D" "D#" "E" "F" "F#" "G" "G#" "A" "A#" "B"])
 
 
-(defn upscale 
+(defn upscale
+  "Return note half-tone higher than given note.
+   In takes optional number of shifts to raise a note"
   ([{::keys [note octave]}]
    (loop [note   note
           octave octave
@@ -18,28 +20,30 @@
             (not (nil? (second scale))))
        {::note (second scale) ::octave octave}
 
-       (nil? (first scale)) 
+       (nil? (first scale))
        {::note "C" ::octave (inc octave)}
-       
-       :else 
+
+       :else
        (recur note octave (drop 1 scale)))))
-  
   ([{::keys [note octave]} shifts]
-   (loop [note note 
-          octave octave 
+   (loop [note note
+          octave octave
           shifts-left shifts]
      (if (= 0 shifts-left)
          {::note note ::octave octave}
-         (let [{::keys [note octave]} 
+         (let [{::keys [note octave]}
                (upscale {::note note ::octave octave})]
               (recur note octave (dec shifts-left)))))))
 
 (comment
   (upscale (upscale {::note "C" ::octave 1}))
-  (upscale {::note "C" ::octave 1}))
+  (upscale {::note "E" ::octave 1}) )
 
 
-(defn calculate-string [starting-note frets]
+(defn calculate-string
+  "Given a starting (open or zero fret) note and number of frets
+  generate return a mapping of fret number to note"
+  [starting-note frets]
   (loop [note starting-note
          i    0
          acc  {}]
@@ -49,7 +53,7 @@
 
 
 (def string->fret->note
-  ""
+  "Standard EBGDAE guitar tuning lookup table"
   {6 (calculate-string {::note "E" ::octave 1} 12)
    5 (calculate-string {::note "A" ::octave 1} 12)
    4 (calculate-string {::note "D" ::octave 2} 12)
@@ -58,7 +62,10 @@
    1 (calculate-string {::note "E" ::octave 3} 12)})
 
 
-(defn note [string fret]
+(defn note
+  "Lookup a note on given string and fret. Assumes \"standard\" guitar tuning
+   of EBGDAE"
+  [string fret]
   (-> string->fret->note
       (get string)
       (get fret)))
@@ -68,7 +75,9 @@
   [{::keys [note octave]}]
   (str note octave))
 
-(comment (pprint-note (note 2 5)))
+(comment
+  (pprint-note (note 2 5)) ;; => E3
+         )
 
 
 (defn- pad-with-sym
@@ -115,18 +124,20 @@
                                (reverse string->fret->note)))]))
 
 
-(defn- find-by-note 
+(defn- find-by-note
   [note]
   (filter
     (fn [[_ v]] (= (::note v) note))))
 
-(defn- find-by-octave 
+(defn- find-by-octave
   [octave]
-  (filter 
+  (filter
    (fn [[_ v]] (= (::octave v) octave))))
 
 
 (defn lookup-note
+  "Given a note without octave return mapping of position where given note can be taken
+   on a guitar fret"
   [note]
  (into {} (map
             (fn [[string fret+notes]]
@@ -157,7 +168,7 @@
 (defn lookup-position
   "Given note and octave return a list of locations map on the fret
    where this note can be taken.
-   Assumes standart western tuning for guitar."
+   Assumes standard western tuning for guitar."
   [note octave]
   (mapcat
    (fn [[k v]]
@@ -176,5 +187,5 @@
 ;;     1 {}}
 
   (lookup-position "A" 1))
-;; => (#:net.fiendishplatypus.notenav.lookup{:string 6, :fret 5} 
+;; => (#:net.fiendishplatypus.notenav.lookup{:string 6, :fret 5}
 ;;     #:net.fiendishplatypus.notenav.lookup{:string 5, :fret 0})
