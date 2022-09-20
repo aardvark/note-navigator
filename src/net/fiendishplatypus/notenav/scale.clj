@@ -136,9 +136,9 @@
                                                   (scale {::l/note tonic ::l/octave o} scale-type))))))))
 
 (comment
-  (to-diagram "A" major)
+  (to-diagram "C" major)
   (notes-to-positions (zipmap (list "R" "2" "3" "4" "5" "6" "7" "R")
-                              (scale {::l/note "A" ::l/octave 1} major)))
+                              (scale {::l/note "A" ::l/octave 2} major)))
 
   (sort-by (fn [item] (Integer/parseInt (name (key item))))
            (merge-with

@@ -157,16 +157,18 @@
 
 
 (defn lookup-note-octave
-  [note octave]
-  (into {} (map
-            (fn [[string fret+notes]]
-              [string (into {} (comp (find-by-note note)
-                                     (find-by-octave octave))
-                        fret+notes)])
-            string->fret->note)))
+  ([{::keys [note octave]}]
+   (lookup-note-octave note octave))
+  ([note octave]
+   (into {} (map
+             (fn [[string fret+notes]]
+               [string (into {} (comp (find-by-note note)
+                                      (find-by-octave octave))
+                             fret+notes)])
+             string->fret->note))))
 
 (comment
-  (lookup-note-octave "A" 2)
+  (lookup-note-octave "A" 2))
 
 
 (defn lookup-position
@@ -183,6 +185,8 @@
           (assoc string ::fret (key fret-and-note)))))
     (lookup-note-octave note octave))))
 
+(comment
   (lookup-position "A" 1))
+  
 ;; => (#:net.fiendishplatypus.notenav.lookup{:string 6, :fret 5}
 ;;     #:net.fiendishplatypus.notenav.lookup{:string 5, :fret 0})
