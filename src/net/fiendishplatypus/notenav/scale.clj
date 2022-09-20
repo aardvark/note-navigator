@@ -14,15 +14,20 @@
   "Given a root note and a scale type
    produce list of notes in a scale"
   [root-note scale]
-  (loop [scale scale
-         note  root-note
-         acc   '()]
-    (if (empty? scale)
-      (reverse acc)
-      (recur
-        (rest scale)
-        (l/upscale note (first scale))
-        (conj acc note)))))
+  (let [root-note (if (string? root-note)
+                    (zipmap [::l/note ::l/octave]
+                            ((fn [[note octave]] [note (Integer/parseInt octave)])
+                             (drop 1 (re-find #"(\w#?)(\d)" root-note))))
+                    root-note)]
+    (loop [scale scale
+           note  root-note
+           acc   '()]
+      (if (empty? scale)
+        (reverse acc)
+        (recur
+         (rest scale)
+         (l/upscale note (first scale))
+         (conj acc note))))))
 
 (comment
   (scale {::l/note "C" ::l/octave 3} major))

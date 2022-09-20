@@ -13,6 +13,12 @@
   [y x1 x2]
   (svg/line x1 y x2 y :stroke "black" :stroke-width "3"))
 
+(defn- text
+  [text x y]
+  (xml/add-attrs (svg/text text)
+                 :x x :y y
+                 :font-family "JetBrains Mono"))
+
 (comment
   "Draw finger placement diagram"
   (spit "test.svg"
@@ -22,45 +28,45 @@
               fret-line   (fn [dy] (hline (+ y dy) (+ x 30) (+ x 150)))]
 
           (xml/emit
-            (svg/svg
-              (xml/add-attrs (svg/text "6") :x (+ x 35) :y y)
-              (string-line 40)
+           (svg/svg
+            (xml/add-attrs (svg/text "6") :x (+ x 35) :y y)
+            (string-line 40)
 
-              (xml/add-attrs (svg/text "5") :x (+ x 55) :y y)
-              (string-line (+ 40 20))
+            (xml/add-attrs (svg/text "5") :x (+ x 55) :y y)
+            (string-line (+ 40 20))
 
-              (xml/add-attrs (svg/text "4") :x (+ x 75) :y y)
-              (string-line (+ 40 20 20))
+            (xml/add-attrs (svg/text "4") :x (+ x 75) :y y)
+            (string-line (+ 40 20 20))
 
-              (xml/add-attrs (svg/text "V") :x x :y (+ y 30))
-              (fret-line 10)
+            (xml/add-attrs (svg/text "V") :x x :y (+ y 30))
+            (fret-line 10)
 
-              (xml/add-attrs (svg/text "VI") :x x :y (+ y 60))
-              (fret-line (+ 10 30))
+            (xml/add-attrs (svg/text "VI") :x x :y (+ y 60))
+            (fret-line (+ 10 30))
 
-              (xml/add-attrs (svg/text "VII") :x x :y (+ y 90))
-              (fret-line (+ 10 30 30))
+            (xml/add-attrs (svg/text "VII") :x x :y (+ y 90))
+            (fret-line (+ 10 30 30))
 
-              (xml/add-attrs (svg/text "VIII") :x x :y (+ y 120))
-              (fret-line (+ 10 30 30 30))
+            (xml/add-attrs (svg/text "VIII") :x x :y (+ y 120))
+            (fret-line (+ 10 30 30 30))
 
-              (xml/add-attrs (svg/text "IX") :x x :y (+ y 150))
-              (fret-line (+ 10 30 30 30 30))
+            (xml/add-attrs (svg/text "IX") :x x :y (+ y 150))
+            (fret-line (+ 10 30 30 30 30))
 
-              (svg/circle (+ x 40 0) (+ y 25 0) 9 :fill "red" :stroke "black" :stroke-width "1")
-              (xml/add-attrs (svg/text "1") :x (+ x 36) :y (+ y 30) :stroke "white" :fill "white")
+            (svg/circle (+ x 40 0) (+ y 25 0) 9 :fill "red" :stroke "black" :stroke-width "1")
+            (xml/add-attrs (svg/text "1") :x (+ x 36) :y (+ y 30) :stroke "white" :fill "white")
 
-              (svg/circle (+ x 40 0) (+ y 25 30 30 30) 9 :fill "white" :stroke "black" :stroke-width "1")
-              (xml/add-attrs (svg/text "4") :x (+ x 36) :y (+ y 30 30 30 30) :stroke "black" :fill "black")
+            (svg/circle (+ x 40 0) (+ y 25 30 30 30) 9 :fill "white" :stroke "black" :stroke-width "1")
+            (xml/add-attrs (svg/text "4") :x (+ x 36) :y (+ y 30 30 30 30) :stroke "black" :fill "black")
 
-              (svg/circle (+ x 40 20) (+ y 25 0) 9 :fill "white" :stroke "black" :stroke-width "1")
-              (xml/add-attrs (svg/text "1") :x (+ x 36 20) :y (+ y 30) :stroke "black" :fill "black")
+            (svg/circle (+ x 40 20) (+ y 25 0) 9 :fill "white" :stroke "black" :stroke-width "1")
+            (xml/add-attrs (svg/text "1") :x (+ x 36 20) :y (+ y 30) :stroke "black" :fill "black")
 
-              (svg/circle (+ x 40 20) (+ y 25 30 30) 9 :fill "white" :stroke "black" :stroke-width "1")
-              (xml/add-attrs (svg/text "3") :x (+ x 36 20) :y (+ y 30 30 30) :stroke "black" :fill "black")
+            (svg/circle (+ x 40 20) (+ y 25 30 30) 9 :fill "white" :stroke "black" :stroke-width "1")
+            (xml/add-attrs (svg/text "3") :x (+ x 36 20) :y (+ y 30 30 30) :stroke "black" :fill "black")
 
-              (svg/circle (+ x 40 20 20) (+ y 25 0) 9 :fill "white" :stroke "black" :stroke-width "1")
-              (xml/add-attrs (svg/text "1") :x (+ x 36 20 20) :y 125 :stroke "black" :fill "black"))))))
+            (svg/circle (+ x 40 20 20) (+ y 25 0) 9 :fill "white" :stroke "black" :stroke-width "1")
+            (xml/add-attrs (svg/text "1") :x (+ x 36 20 20) :y 125 :stroke "black" :fill "black"))))))
 
 
 (defn make-strings
@@ -92,8 +98,8 @@
         (let [x 60
               y 95]
           (xml/emit
-            (apply svg/svg
-                   (make-strings x y))))))
+           (apply svg/svg
+                  (make-strings x y))))))
 
 
 (defn- make-fret
@@ -126,17 +132,17 @@
 (comment
   (spit "test-frets.svg"
         (xml/emit
-          (apply svg/svg
-                 (make-frets 0 0 ["I" "II" "III" "IV"])))))
+         (apply svg/svg
+                (make-frets 0 0 ["I" "II" "III" "IV"])))))
 
 (comment
   (spit "test-fret-string.svg"
         (xml/emit
-          (apply svg/svg
-                 (concat
-                   [{:width 200 :height 200}]
-                   (make-frets 60 95 ["I" "II" "III" "IV"])
-                   (make-strings 60 95))))))
+         (apply svg/svg
+                (concat
+                 [{:width 200 :height 200}]
+                 (make-frets 60 95 ["I" "II" "III" "IV"])
+                 (make-strings 60 95))))))
 
 
 ;;circle dx is 20
@@ -161,11 +167,11 @@
 (comment
   (spit "test-circles.svg"
         (xml/emit
-          (apply svg/svg
-                 (concat []
-                         [{:width 200 :height 200}]
-                         (finger-circle 0 0 0 0 "1R")
-                         (finger-circle 10 20 10 30 "5"))))))
+         (apply svg/svg
+                (concat []
+                        [{:width 200 :height 200}]
+                        (finger-circle 0 0 0 0 "1R")
+                        (finger-circle 10 20 10 30 "5"))))))
 
 
 (defn circle-row
@@ -182,16 +188,16 @@
   (spit "test-fret-string-circles.svg"
         (let [x0 10 y0 10]
           (xml/emit
-            (apply svg/svg
-                   (concat
-                     [{:width 400 :height 400}]
-                     (make-frets x0 y0 ["I" "II" "III" "IV" "V" "VI"])
-                     (make-strings x0 y0)
-                     (circle-row x0 y0 ["1R" "1" "1" "1" "1" "1R"])
-                     (circle-row x0 (+ y0 30) [])
-                     (circle-row x0 (+ y0 30 30) ["" "3" "3R" "3" "" ""])
-                     (circle-row x0 (+ y0 30 30 30) ["4" "" "" "" "4" "4"])
-                     (circle-row x0 (+ y0 30 30 30 30) ["4" "" "" "" "4" "4"])))))))
+           (apply svg/svg
+                  (concat
+                   [{:width 400 :height 400}]
+                   (make-frets x0 y0 ["I" "II" "III" "IV" "V" "VI"])
+                   (make-strings x0 y0)
+                   (circle-row x0 y0 ["1R" "1" "1" "1" "1" "1R"])
+                   (circle-row x0 (+ y0 30) [])
+                   (circle-row x0 (+ y0 30 30) ["" "3" "3R" "3" "" ""])
+                   (circle-row x0 (+ y0 30 30 30) ["4" "" "" "" "4" "4"])
+                   (circle-row x0 (+ y0 30 30 30 30) ["4" "" "" "" "4" "4"])))))))
 
 (defn make-finger-circles
   [x0 y0 finger-placement]
@@ -207,22 +213,22 @@
   (spit "minor-pentatonic-1.svg"
         (let [x0 10 y0 10]
           (xml/emit
-            (apply svg/svg
-                   (concat
-                     [{:width 200 :height 200}]
-                     (make-frets x0 y0 ["I" "II" "III" "IV" ""])
-                     (make-strings x0 y0)
-                     (make-finger-circles x0 y0 [["1R" "1" "1" "1" "1" "1R"]
-                                                 []
-                                                 ["" "3" "3R" "3" "" ""]
-                                                 ["4" "" "" "" "4" "4"]])))))))
+           (apply svg/svg
+                  (concat
+                   [{:width 200 :height 200}]
+                   (make-frets x0 y0 ["I" "II" "III" "IV" ""])
+                   (make-strings x0 y0)
+                   (make-finger-circles x0 y0 [["1R" "1" "1" "1" "1" "1R"]
+                                               []
+                                               ["" "3" "3R" "3" "" ""]
+                                               ["4" "" "" "" "4" "4"]])))))))
 
 
 (defn note
   [x0 dx y0 dy note]
   (let [dx (if (= 3 (count note))
-               dx
-               (+ 3 dx))
+             dx
+             (+ 3 dx))
         effX (+ x0 dx)
         effY (+ y0 dy)]
     ;;TODO white fill doesn't look nice when background is black
@@ -307,19 +313,19 @@
   ([input x0 y0 {:keys [width height]}]
 
    (let [input (into (sorted-map-by (fn [a b]
-                                 (< (keyword->int a)
-                                    (keyword->int b))))
+                                      (< (keyword->int a)
+                                         (keyword->int b))))
                      input)
          frets     (map (comp str keyword->int) (keys input))
          notes     (map (comp to-note-row (fn [[k v]] [k (to-strings v)])) input)]
      (xml/emit
-       (apply svg/svg
-              (concat
-                [{:width width :height height}]
-                (make-frets x0 y0 (conj (vec frets) ""))
-                (make-strings (count frets) x0 y0)
-                (make-finger-circles x0 y0 (vals input))
-                (make-notes (+ x0 32) (+ y0 10) notes)))))))
+      (apply svg/svg
+             (concat
+              [{:width width :height height}]
+              (make-frets x0 y0 (conj (vec frets) ""))
+              (make-strings (count frets) x0 y0)
+              (make-finger-circles x0 y0 (vals input))
+              (make-notes (+ x0 32) (+ y0 10) notes)))))))
 
 (comment
   "Minor pentatonic scale variant 1 with notes"
@@ -332,13 +338,13 @@
               frets     (map (comp str keyword->int) (keys input))
               notes     (map (comp to-note-row (fn [[k v]] [k (to-strings v)])) input)]
           (xml/emit
-            (apply svg/svg
-                   (concat
-                     [{:width 200 :height 200}]
-                     (make-frets x0 y0 (conj (vec frets) ""))
-                     (make-strings  x0 y0)
-                     (make-finger-circles x0 y0 (vals input))
-                     (make-notes (+ x0 32) (+ y0 10) notes)))))))
+           (apply svg/svg
+                  (concat
+                   [{:width 200 :height 200}]
+                   (make-frets x0 y0 (conj (vec frets) ""))
+                   (make-strings  x0 y0)
+                   (make-finger-circles x0 y0 (vals input))
+                   (make-notes (+ x0 32) (+ y0 10) notes)))))))
 
 
 (comment
@@ -392,15 +398,13 @@
   (spit "C-minor.svg"
         (fingerboard
          (scale/to-diagram "D" scale/major)
-         20 20 {:width 200 :height 800}))
-  )
+         20 20 {:width 200 :height 800})))
 
 (comment
   (into
    (sorted-map-by (fn [a b]
                     (< (keyword->int a)
-                       (keyword->int b))
-                    ))
+                       (keyword->int b))))
    {:1 '("" "" "" "" "0" "0")
     :2 '("" "" "" "" "" "")
     :3 '("" "" "" "" "0" "0")
@@ -413,6 +417,77 @@
     :10 '("" "" "0" "0" "" "")
     :11 '("" "" "" "" "0" "")
     :12 '("" "" "0" "0" "" "")}))
+
+(defn all-notes []
+  (concat
+   (map-indexed (fn [i x] [(lookup/pprint-note x) i 0]) (vals (get lookup/string->fret->note 1)))
+   (map-indexed (fn [i x] [(lookup/pprint-note x) i 1]) (vals (get lookup/string->fret->note 2)))
+   (map-indexed (fn [i x] [(lookup/pprint-note x) i 2]) (vals (get lookup/string->fret->note 3)))
+   (map-indexed (fn [i x] [(lookup/pprint-note x) i 3]) (vals (get lookup/string->fret->note 4)))
+   (map-indexed (fn [i x] [(lookup/pprint-note x) i 4]) (vals (get lookup/string->fret->note 5)))
+   (map-indexed (fn [i x] [(lookup/pprint-note x) i 5]) (vals (get lookup/string->fret->note 6)))))
+
+(defn scale-notes-for-grid
+  "Given a `root-note` and a `scale-type` return sequence of note definitions for 
+   drawing a vertical grid [note string-idx fret-number]"
+  [root-note scale-type]
+  (mapcat (fn [[string fret-to-note]]
+            (map
+             (fn [[fret note]]
+               [(lookup/pprint-note note) fret (dec string)])
+             fret-to-note))
+
+          (apply merge-with merge
+                 (map lookup/lookup-note-octave
+                      (flatten
+                       (concat
+                        '()
+                        (for [x (map #(str root-note %) (range 1 5))]
+                          (scale/scale x scale-type))))))))
+
+(defn vgrid [notes-def]
+  (xml/emit
+   (apply svg/svg
+          (let [cy 60 n-string 6
+                cx 70 n-bar 13
+                first-string-y0 55
+                bar-y0 40
+                first-bar-x0 (+ 20 cx)
+                i (atom 0)]
+            (concat []
+                    ;; 3 5 7 9 bar markers
+                    (map #(svg/rect (+ first-bar-x0 (* cx %) (int (/ cx 3)))
+                                    10
+                                    (+ first-string-y0 (* 6 cy))
+                                    (int (/ cx 3))
+                                    :fill-opacity ".25")
+                         [2 4 6 8])
+                    
+                    ;; horizontal "strings" lines
+                    (map #(svg/line first-bar-x0        %
+                                    (+ 10 (* n-bar cx)) %
+                                    :stroke "black" :stroke-width (swap! i inc))
+                         (range first-string-y0 (+ 1 (* n-string cy)) cy))
+
+                    ;; vertical "bars" lines
+                    (map #(svg/line % bar-y0
+                                    % (+ 15 (* n-string cy))
+                                    :stroke "black" :stroke-width "2")
+                         (range first-bar-x0 (+ 1 (* n-bar cx)) cx))
+
+                    ;; notes rings
+                    (map (fn [[note x y]]
+                           (svg/group
+                            (svg/circle (+ 55 (* x cx)) (+ 55 (* y cy))
+                                        (int (/ (- (min cy cx) 5) 2))
+                                        :stroke "black" :fill "white" :stroke-width "2")
+                            (text note (+ (- 55 15) (* x cx)) (+ (+ 55 5) (* y cy)))))
+                         notes-def))))))
+
+(comment
+  (spit "vertical-grid.svg" (vgrid (all-notes)))
+  (spit "C-major-vertical.svg" (vgrid (scale-notes-for-grid "C" scale/major)))
+  )
 
 
 

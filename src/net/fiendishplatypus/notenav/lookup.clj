@@ -1,5 +1,6 @@
 (ns net.fiendishplatypus.notenav.lookup
-  (:require [clojure.string]))
+  (:require [clojure.string]
+            [net.fiendishplatypus.notenav.lookup :as lookup]))
 
 
 (def tuning-scale
@@ -48,7 +49,7 @@
          i    0
          acc  {}]
     (if (> i frets)
-      acc
+      (into (sorted-map-by <) acc)
       (recur (upscale note) (inc i) (conj acc {i note})))))
 
 
@@ -164,27 +165,23 @@
                         fret+notes)])
             string->fret->note)))
 
+(comment
+  (lookup-note-octave "A" 2)
+
 
 (defn lookup-position
   "Given note and octave return a list of locations map on the fret
    where this note can be taken.
    Assumes standard western tuning for guitar."
-  [note octave]
-  (mapcat
-   (fn [[k v]]
-     (let [string {::string k}]
-       (for [fret-and-note v]
-         (assoc string ::fret (key fret-and-note)))))
-   (lookup-note-octave note octave)))
-
-(comment
-  (lookup-note-octave "A" 1)
-;; => {6 {5 #:net.fiendishplatypus.notenav.lookup{:note "A", :octave 1}},
-;;     5 {0 #:net.fiendishplatypus.notenav.lookup{:note "A", :octave 1}},
-;;     4 {},
-;;     3 {},
-;;     2 {},
-;;     1 {}}
+  ([{::keys [note octave]}]
+   (lookup-position note octave))
+  ([note octave]
+   (mapcat
+    (fn [[k v]]
+      (let [string {::string k}]
+        (for [fret-and-note v]
+          (assoc string ::fret (key fret-and-note)))))
+    (lookup-note-octave note octave))))
 
   (lookup-position "A" 1))
 ;; => (#:net.fiendishplatypus.notenav.lookup{:string 6, :fret 5}
