@@ -456,16 +456,21 @@
                 i (atom 0)]
             (concat []
                     ;; 3 5 7 9 bar markers
-                    (map #(svg/rect (+ first-bar-x0 (* cx %) (int (/ cx 3)))
-                                    10
-                                    (+ first-string-y0 (* 6 cy))
-                                    (int (/ cx 3))
-                                    :fill-opacity ".25")
-                         [2 4 6 8])
+                    (map (fn [x]
+                           (svg/group
+                            (svg/rect (+ first-bar-x0 (* cx x) (int (/ cx 3)))
+                                      10
+                                      (+ first-string-y0 (* 6 cy))
+                                      (int (/ cx 3))
+                                      :fill-opacity ".25")
+                            (text (str (inc x))
+                                  (+ first-bar-x0 (* cx x) (int (/ cx 2.5)) )
+                                  (+ first-string-y0 (* 6 cy)))))
+                          [2 4 6 8 11])
                     
                     ;; horizontal "strings" lines
                     (map #(svg/line first-bar-x0        %
-                                    (+ 10 (* n-bar cx)) %
+                                    (+ 20 (* n-bar cx)) %
                                     :stroke "black" :stroke-width (swap! i inc))
                          (range first-string-y0 (+ 1 (* n-string cy)) cy))
 
@@ -473,7 +478,7 @@
                     (map #(svg/line % bar-y0
                                     % (+ 15 (* n-string cy))
                                     :stroke "black" :stroke-width "2")
-                         (range first-bar-x0 (+ 1 (* n-bar cx)) cx))
+                         (range first-bar-x0 (+ 1 (* (inc n-bar) cx)) cx))
 
                     ;; notes rings
                     (map (fn [[note x y]]
@@ -486,7 +491,7 @@
 
 (comment
   (spit "vertical-grid.svg" (vgrid (all-notes)))
-  (spit "C-major-vertical.svg" (vgrid (scale-notes-for-grid "C" scale/major)))
+  (spit "A-major-vertical.svg" (vgrid (scale-notes-for-grid "A" scale/major)))
   )
 
 
